@@ -1,0 +1,53 @@
+LEDGER STATISTICS
+
+> Index:
+
+    0. General notes
+    1. Average Depth of DAG
+    2. Average number of transaction per depth
+    3. Average number of in-references per node
+    4. (additional proposed statistic) Average transaction per timestamp unit
+    5. (additional proposed statistic) Transaction confirmation % referring to the overall network
+
+
+> Detailed description:
+
+- 0.
+I considered, as assumption, that in the file "database.txt" are written the number of nodes (on line #1) and all the
+nodes of the DAG (from line #2). Node with ID=1 is not listed inside the file and it is the origin of all nodes of the
+DAG. I decided to develop this task using the C programming language and using some C libraries that I developed during
+my university courses (queueLibrary and graphLibrary). I implemented the DAG using an adjacency matrix of a custom
+defined struct that contains some information (timestamp, weight, reference). Each cell of the matrix represents an edge
+from node j to node i.
+Multiple edges connecting the same pair of nodes are taken into account in all statistics computations. In the example,
+the node referred to in line 4 (node with ID=4) has node 2 as both Left and Right parent.
+From a mathematical point of view multiple identical edges can be relevant and this is why I included them in my
+statistics computation in calculating the statistics. On the other hand, if the graph represents the Tangle a
+"double edge" does not introduce any advantage from the tx verification point of view, (in other words it just creates
+unnecessary work). So an alternative version of the SW could avoid considering multiple edges when calculating the
+confirmation level.
+
+- 1.
+This has been done performing a breadth first search on the DAG starting from the origin (node with ID:1). It can also
+be used Bellman-Ford or Dijkstra algorithm using each link with weight = 1. Then, having the array with bstResult, it is
+possible to compute a depth for each node.
+
+- 2.
+Using the same results of the previous point (bstResult and depths for each node) this statistic is easily computed.
+
+- 3.
+When building the DAG (building adjacency matrix), reading the "database.txt" file, each edge has a reference number.
+So, this statistic is easily computed performing a sum of each node references and then dividing by total node number.
+
+- 4.
+Compute total number of transactions (in-reference) and then perform an average considering timestamp unit.
+This could be useful to have an idea of the throughput of the network. TX per seconds or depending on timestamp
+considered unit.
+
+- 5.
+Having in mind the idea of the tangle, each node is a TX and a link means that another TX refers to it. I want to
+compute (in percentage) the level of confirmation (how many TXs refer to a specific TX (a node with a specific ID),
+directly or indirectly. The maximum confirmation number is the number of TXs that refer to the origin node. Every TX
+on the tangle will refer directly or undirectly to the origin.
+I want to compute the level of confirmation of a TX as a percentage of the maximum number of confirmations. In this way
+I can give an idea of the relative acceptance status of a specific TX.
